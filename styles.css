@@ -34,13 +34,17 @@ body, html {
 }
 
 .logo-image {
-    height: 30px;
+    height: 45px;
     width: auto;
     display: block;
+    margin-right: 10px;
 }
 
 .hero {
     flex-grow: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
     padding-bottom: 60px;
     padding-top: 10px;
 }
@@ -110,7 +114,7 @@ body, html {
 }
 
 .footer {
-    position: absolute;
+    position: absolute; 
     bottom: 0;
     left: 0;
     right: 0;
@@ -120,11 +124,12 @@ body, html {
     align-items: center;
     border-top: 1px solid #ccc;
     background-color: #f8f7f5;
+    z-index: 10;
 }
 
 .footer-links {
     display: flex;
-    gap: 20px;
+    gap: 30px;
 }
 
 .footer-links a {
@@ -153,6 +158,7 @@ body, html {
     display: block;
 }
 
+/* --- ВЛАСНА СІТКА --- */
 .row {
     display: flex;
     flex-wrap: wrap; 
@@ -213,6 +219,7 @@ body, html {
     .hero {
         align-items: center;
         text-align: center;
+        justify-content: center;
     }
 
     .headline {
