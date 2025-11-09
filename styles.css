@@ -41,10 +41,6 @@ body, html {
 
 .hero {
     flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: right;
     padding-bottom: 60px;
     padding-top: 10px;
 }
@@ -224,6 +220,7 @@ body, html {
         line-height: 1.15;
         text-shadow: none; 
         margin-right: 0;
+        text-align: center;
     }
 
     .cta-buttons {
@@ -239,11 +236,13 @@ body, html {
     }
 
     .footer {
+        display: flex;
         flex-direction: column;
         justify-content: center;
         text-align: center;
         gap: 15px;
         position: static;
+        width: 100%;
     }
 
     .footer-links {
