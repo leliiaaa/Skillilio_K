@@ -62,7 +62,9 @@ body, html {
 }
 
 .cta-block {
-    margin-right: 0; 
+    margin-right: 0;
+    width: 100%;
+    text-align: right; 
 }
 
 .subtitle {
@@ -157,7 +159,6 @@ body, html {
     display: block;
 }
 
-/* --- ВЛАСНА СІТКА --- */
 .row {
     display: flex;
     flex-wrap: wrap; 
