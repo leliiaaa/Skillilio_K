@@ -1,5 +1,6 @@
 {% load static %}
-{% load socialaccount %} 
+{% load socialaccount %}
+
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -17,16 +18,21 @@
             
             <div id="signup-panel" class="d-flex">
                 <form id="signup-form" class="form-container" method="POST" action="/accounts/signup/">
-                    {% csrf_token %} 
+                    {% csrf_token %}
                     <h2 class="form-title">Create account</h2>
                     
-                    <div class="social-icons">
-                        <a href="#" class="social-icon">G</a>
-                        <a href="#" class="social-icon">f</a>
-                        <a href="#" class="social-icon">GitHub</a>
-                    </div>
+<div class="social-icons">
+    <a href="#" class="social-icon">G</a>
+    
+    <a href="#" class="social-icon">f</a>
+    
+    <a href="{% provider_login_url 'github' %}" class="social-icon">GitHub</a>
+    
+    <a href="#" class="social-icon">in</a>
+</div>
                     
                     <p class="separator">or use your email for registration</p>
+                    
                     <input type="text" name="username" placeholder="Name" required>
                     <input type="email" name="email" placeholder="Email" required>
                     <input type="password" name="password" placeholder="Password" required>
@@ -52,11 +58,15 @@
                     {% csrf_token %}
                     <h2 class="form-title">Sign In</h2>
                     
-                    <div class="social-icons">
-                        <a href="#" class="social-icon">G</a>
-                        <a href="#" class="social-icon">f</a>
-                        <a href="#" class="social-icon">GitHub</a>
-                    </div>
+<div class="social-icons">
+    <a href="#" class="social-icon">G</a>
+    
+    <a href="#" class="social-icon">f</a>
+    
+    <a href="{% provider_login_url 'github' %}" class="social-icon">GitHub</a>
+    
+    <a href="#" class="social-icon">in</a>
+</div>
                 
                     <p class="separator">or use your email and password</p>
                     <input type="email" name="login" placeholder="Email" required>

@@ -144,3 +144,6 @@ AUTHENTICATION_BACKENDS = [
 
 LOGIN_REDIRECT_URL = '/' 
 LOGOUT_REDIRECT_URL = '/'
+
+# Дозволяє вхід через соцмережі відразу при натисканні посилання
+SOCIALACCOUNT_LOGIN_ON_GET = True
