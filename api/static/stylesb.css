@@ -1,0 +1,91 @@
+body {
+    background-color: #f0f2f5; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.btn-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(118, 75, 162, 0.5);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.text-brand {
+    background: -webkit-linear-gradient(45deg, #667eea, #764ba2);
+    background-clip: text;       
+    -webkit-background-clip: text;  
+    -webkit-text-fill-color: transparent;
+    font-weight: 800 !important;
+}
+
+.sidebar-menu {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid #eef0f7;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+}
+
+.sidebar-menu a {
+    color: #6c757d;
+    padding: 14px 25px;
+    display: block;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.2s;
+    border-left: 4px solid transparent;
+    cursor: pointer;
+}
+
+.sidebar-menu a:hover {
+    background-color: #f8f9fa;
+    color: #764ba2;
+    padding-left: 30px;
+}
+
+.sidebar-menu a.active {
+    border-left: 4px solid #764ba2;
+    background: linear-gradient(90deg, rgba(118, 75, 162, 0.1) 0%, rgba(255,255,255,0) 100%);
+    color: #764ba2;
+    font-weight: 700;
+}
+
+.content-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    border: 1px solid #eef0f7;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+    margin-bottom: 25px;
+}
+
+.badge-price {
+    background-color: #ede7f6;
+    color: #673ab7;
+    font-size: 0.9rem;
+    padding: 8px 15px;
+    border-radius: 20px;
+}
+
+.user-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.badge-client { background-color: #e3f2fd; color: #0d6efd; }
+.badge-freelancer { background-color: #f3e5f5; color: #9c27b0; }
+
+.form-label { font-weight: 500; font-size: 0.9rem; color: #666; }
+.form-control:focus { border-color: #667eea; box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25); }

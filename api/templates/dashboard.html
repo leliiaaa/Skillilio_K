@@ -1,0 +1,275 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skillilio - Кабінет</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'stylesb.css' %}">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4 sticky-top" style="border-bottom: 1px solid #eef0f7;">
+    <div class="container">
+        <a class="navbar-brand fs-3" href="{% url 'home' %}">
+            <span class="text-brand">Skillilio</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 fw-medium">
+                {% if user.profile.role == 'client' %}
+                    <li class="nav-item"><a class="nav-link" href="#">Мої замовлення</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Фрілансери</a></li>
+                {% elif user.profile.role == 'freelancer' %}
+                    <li class="nav-item"><a class="nav-link" href="#">Мої ставки</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Всі замовлення</a></li>
+                {% endif %}
+            </ul>
+
+            <div class="d-flex align-items-center gap-3">
+                {% if user.profile.role == 'client' %}
+                    <a href="{% url 'create_order' %}" class="btn btn-gradient px-4 py-2 rounded-pill">
+                        + Нове замовлення
+                    </a>
+                {% elif user.profile.role == 'freelancer' %}
+                    <button class="btn btn-gradient px-4 py-2 rounded-pill">
+                        🔍 Пошук завдань
+                    </button>
+                {% endif %}
+
+                <a href="{% url 'inbox' %}" class="text-secondary fs-5 ms-2 text-decoration-none">📩</a>
+                <a href="#" class="text-secondary fs-5 text-decoration-none">🔔</a>
+                
+                <div style="width: 1px; height: 25px; background: #eee;"></div>
+
+                <form method="post" action="{% url 'account_logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link text-secondary text-decoration-none fw-bold p-0" style="font-size: 14px;">Вийти</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container mb-5">
+    <div class="row">
+        
+        <div class="col-md-3">
+            <div class="content-card text-center p-4 mb-3 border-0">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 50%; font-size: 32px; line-height: 80px; margin: 0 auto 15px; box-shadow: 0 5px 15px rgba(118, 75, 162, 0.3);">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+                <h5 class="mb-2 fw-bold">
+                    {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}
+                </h5>
+                
+                {% if user.profile.role == 'client' %}
+                    <span class="user-badge badge-client">ЗАМОВНИК</span>
+                {% else %}
+                    <span class="user-badge badge-freelancer">ФРІЛАНСЕР</span>
+                {% endif %}
+            </div>
+
+            <div class="sidebar-menu mb-4 border-0">
+                <a href="#" id="link-dashboard" class="active">🏠 Кабінет</a>
+                <a href="{% url 'inbox' %}">💬 Листування</a>
+                <a href="#">💰 Мої фінанси</a>
+                <a href="#" id="link-settings">⚙️ Особисті дані</a>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+
+            <div id="work-section">
+                
+                {% if user.profile.role == 'client' %}
+                <div class="content-card border-0">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0 fw-bold">Мої Замовлення</h4>
+                    </div>
+                    
+                    {% if my_orders %}
+                        <div class="list-group list-group-flush">
+                            {% for order in my_orders %}
+                                <a href="{% url 'order_detail' order.id %}" class="list-group-item list-group-item-action px-0 py-3 border-bottom text-decoration-none">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <h5 class="mb-1 text-dark fw-bold">{{ order.title }}</h5>
+                                        <div class="d-flex gap-2 align-items-center">
+                                            <span class="badge badge-price">{{ order.budget }} грн</span>
+                                            <object><a href="{% url 'edit_order' order.id %}" class="btn btn-light btn-sm text-muted border" title="Редагувати">✏️</a></object>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">{{ order.created_at|date:"d.m.Y" }}</small>
+                                    <p class="text-muted mt-2 mb-0 small">{{ order.description|truncatechars:80 }}</p>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-light text-center text-muted py-5">
+                            <span style="font-size: 40px;">📂</span><br>
+                            Активних замовлень немає.
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% elif user.profile.role == 'freelancer' %}
+                <div class="content-card border-0">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0 fw-bold">Стрічка замовлень</h4>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                🔽 Категорії
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="max-height: 400px; overflow-y: auto;">
+                                <li><a class="dropdown-item fw-bold text-primary" href="?cat=all">🌐 Всі замовлення</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="?cat=web_dev">💻 Веб-розробка</a></li>
+                                <li><a class="dropdown-item" href="?cat=backend">⚙️ Backend</a></li>
+                                <li><a class="dropdown-item" href="?cat=frontend">🎨 Frontend</a></li>
+                                <li><a class="dropdown-item" href="?cat=mobile">📱 Мобільні додатки</a></li>
+                                <li><a class="dropdown-item" href="?cat=gamedev">🎮 GameDev</a></li>
+                                <li><a class="dropdown-item" href="?cat=design">🖌️ Дизайн та Арт</a></li>
+                                <li><a class="dropdown-item" href="?cat=qa">🐞 Тестування (QA)</a></li>
+                                <li><a class="dropdown-item" href="?cat=other">📌 Інше</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    {% if all_orders %}
+                        <div class="list-group list-group-flush">
+                            {% for order in all_orders %}
+                                <a href="{% url 'order_detail' order.id %}" class="list-group-item list-group-item-action px-0 py-4 border-bottom">
+                                    <div class="d-flex w-100 justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="mb-1 text-dark fw-bold">
+                                                {{ order.title }}
+                                                <span class="badge bg-light text-secondary border ms-2" style="font-size: 0.6em; vertical-align: middle;">{{ order.get_category_display }}</span>
+                                            </h5>
+                                            <p class="mb-2 text-muted">{{ order.description|truncatechars:120 }}</p>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <small class="text-muted">👤 {{ order.client.username }}</small>
+                                                <small class="text-muted">🕒 {{ order.created_at|timesince }} тому</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="badge badge-price mb-2 fs-6">{{ order.budget }} грн</div>
+                                            <br>
+                                            <object><a href="{% url 'chat_room' order.client.id %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Написати</a></object>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-light text-center py-5">
+                            Поки що завдань немає 😴
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="content-card border-0" id="settings-section" style="display: none;">
+                <h4 class="mb-4 fw-bold">📝 Особисті дані</h4>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4 text-center">
+                        <label class="form-label text-muted small d-block">Фото профілю</label>
+                        <div class="d-flex justify-content-center align-items-center gap-3">
+                            <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #eee;">
+                                {% if user.profile.avatar %}
+                                    <img src="{{ user.profile.avatar.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <span style="line-height: 60px; color: #999;">?</span>
+                                {% endif %}
+                            </div>
+                            {{ p_form.avatar }}
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Ім'я</label>
+                            {{ u_form.first_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Прізвище</label>
+                            {{ u_form.last_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Країна</label>
+                            {{ p_form.country }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Місто</label>
+                            {{ p_form.city }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small">Дата народження</label>
+                            {{ p_form.birth_date }}
+                        </div>
+                    </div>
+
+                    <hr class="my-4 bg-light">
+                    
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            {{ p_form.is_freelance }}
+                            <label class="form-check-label small text-muted">Фриланс-проєкти</label>
+                        </div>
+                        <div class="form-check">
+                            {{ p_form.is_remote }}
+                            <label class="form-check-label small text-muted">Віддалена робота</label>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-end">
+                        <button type="submit" class="btn btn-gradient px-5 rounded-pill">Зберегти зміни</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkDashboard = document.getElementById('link-dashboard');
+    const linkSettings = document.getElementById('link-settings');
+    const sectionWork = document.getElementById('work-section');
+    const sectionSettings = document.getElementById('settings-section');
+
+    linkDashboard.addEventListener('click', function(e) {
+        e.preventDefault();
+        sectionWork.style.display = 'block';
+        sectionSettings.style.display = 'none';
+        
+        linkDashboard.classList.add('active');
+        linkSettings.classList.remove('active');
+    });
+
+    linkSettings.addEventListener('click', function(e) {
+        e.preventDefault();
+        sectionWork.style.display = 'none';
+        sectionSettings.style.display = 'block';
+        
+        linkSettings.classList.add('active');
+        linkDashboard.classList.remove('active');
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

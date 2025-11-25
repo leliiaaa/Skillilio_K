@@ -20,16 +20,13 @@
                 <form id="signup-form" class="form-container" method="POST" action="/accounts/signup/">
                     {% csrf_token %}
                     <h2 class="form-title">Create account</h2>
-                    
-<div class="social-icons">
-    <a href="#" class="social-icon">G</a>
-    
-    <a href="#" class="social-icon">f</a>
-    
-    <a href="{% provider_login_url 'github' %}" class="social-icon">GitHub</a>
-    
-    <a href="#" class="social-icon">in</a>
-</div>
+                
+                    <div class="social-icons">
+                        <a href="{% provider_login_url 'google' %}" class="social-icon">G</a>
+                        <a href="#" class="social-icon">f</a>
+                        <a href="{% provider_login_url 'github' %}" class="social-icon">GitHub</a>
+                        <a href="#" class="social-icon">in</a>
+                    </div>
                     
                     <p class="separator">or use your email for registration</p>
                     
@@ -58,15 +55,12 @@
                     {% csrf_token %}
                     <h2 class="form-title">Sign In</h2>
                     
-<div class="social-icons">
-    <a href="#" class="social-icon">G</a>
-    
-    <a href="#" class="social-icon">f</a>
-    
-    <a href="{% provider_login_url 'github' %}" class="social-icon">GitHub</a>
-    
-    <a href="#" class="social-icon">in</a>
-</div>
+                    <div class="social-icons">
+                        <a href="{% provider_login_url 'google' %}" class="social-icon">G</a>
+                        <a href="#" class="social-icon">f</a>
+                        <a href="{% provider_login_url 'github' %}" class="social-icon">GitHub</a>
+                        <a href="#" class="social-icon">in</a>
+                    </div>
                 
                     <p class="separator">or use your email and password</p>
                     <input type="email" name="login" placeholder="Email" required>

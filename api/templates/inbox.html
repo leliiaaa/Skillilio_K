@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Листування</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'stylesb.css' %}">
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        
+        .dialog-item {
+            transition: all 0.2s ease;
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 5px;
+        }
+        .dialog-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+            border-left: 4px solid #667eea;
+        }
+        .dialog-item:last-child { border-bottom: none; }
+
+        .inbox-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            margin: -30px -30px 20px -30px; 
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-white shadow-sm mb-5 sticky-top">
+    <div class="container">
+        <a class="navbar-brand fs-3" href="{% url 'home' %}">
+            <span class="text-brand">Skillilio</span>
+        </a>
+        
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                ← Назад у кабінет
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <div class="content-card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white">
+                
+                <div class="inbox-header mb-4">
+                    <h2 class="mb-0 fw-bold">💌 Мої повідомлення</h2>
+                    <p class="mb-0 opacity-75 small">Список ваших активних діалогів</p>
+                </div>
+
+                <div class="list-group list-group-flush">
+                    {% if dialog_partners %}
+                        {% for partner in dialog_partners %}
+                            <a href="{% url 'chat_room' partner.id %}" class="list-group-item list-group-item-action dialog-item p-3">
+                                <div class="d-flex align-items-center">
+                                    
+                                    <div class="me-3">
+                                        <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #eee; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                            {% if partner.profile.avatar %}
+                                                <img src="{{ partner.profile.avatar.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                            {% else %}
+                                                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">
+                                                    {{ partner.username|slice:":1"|upper }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex w-100 justify-content-between align-items-center">
+                                            <h5 class="mb-1 fw-bold text-dark">
+                                                {% if partner.first_name %}
+                                                    {{ partner.first_name }} {{ partner.last_name }}
+                                                {% else %}
+                                                    {{ partner.username }}
+                                                {% endif %}
+                                            </h5>
+                                            <small class="text-muted">Відкрити чат ›</small>
+                                        </div>
+                                        
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if partner.profile.role == 'client' %}
+                                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10 rounded-pill" style="font-size: 0.7em;">ЗАМОВНИК</span>
+                                            {% else %}
+                                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 rounded-pill" style="font-size: 0.7em;">ФРІЛАНСЕР</span>
+                                            {% endif %}
+                                            
+                                            <p class="mb-0 text-muted small text-truncate" style="max-width: 200px;">
+                                                Натисніть, щоб продовжити спілкування...
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div style="font-size: 60px; margin-bottom: 20px;">📭</div>
+                            <h4 class="text-muted">У вас поки немає повідомлень</h4>
+                            <p class="text-muted small">Знайдіть замовлення і напишіть автору, щоб почати діалог.</p>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-primary rounded-pill mt-3">Знайти співрозмовника</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

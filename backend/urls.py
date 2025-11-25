@@ -4,7 +4,7 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # Вхід через соцмережі 
+    # вхід через соцмережі 
     path('accounts/', include('allauth.urls')),
     
     # головна сторінка

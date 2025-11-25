@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-1&_ahfb9gt=%hz=p+m!byovhv9u@1b1o%-)=q9vy7*_p3#6=hc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -142,8 +142,10 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-LOGIN_REDIRECT_URL = '/' 
-LOGOUT_REDIRECT_URL = '/'
+ACCOUNT_SIGNUP_REDIRECT_URL = 'check_role'
+LOGOUT_REDIRECT_URL = 'home'
 
-# Дозволяє вхід через соцмережі відразу при натисканні посилання
 SOCIALACCOUNT_LOGIN_ON_GET = True
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
