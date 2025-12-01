@@ -1,12 +1,13 @@
 from django.contrib import admin
-from django.urls import path, include  
+from django.urls import path, include
+from allauth.account.views import LoginView, SignupView 
+from api.views import check_role
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
-    # вхід через соцмережі 
+    path('accounts/login/', LoginView.as_view(template_name='auth.html'), name='account_login'),
+    path('accounts/signup/', SignupView.as_view(template_name='auth.html'), name='account_signup'),
     path('accounts/', include('allauth.urls')),
-    
-    # головна сторінка
+    path('accounts/profile/', check_role),  
     path('', include('api.urls')), 
 ]

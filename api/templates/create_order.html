@@ -109,6 +109,12 @@
                         <div class="form-text text-end mt-1">Опишіть, що саме потрібно зробити</div>
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label text-danger">Вимоги до кандидата (для ШІ)</label>
+                        {{ form.requirements }}
+                        <div class="form-text">На основі цього ШІ буде тестувати фрілансерів.</div>
+                    </div>
+
                     <div class="d-grid gap-2 mt-5">
                         <button type="submit" class="btn btn-gradient btn-lg rounded-pill shadow-sm">
                             {% if is_edit %}Зберегти зміни{% else %}Опублікувати завдання{% endif %}

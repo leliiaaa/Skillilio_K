@@ -6,48 +6,18 @@ from django.dispatch import receiver
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, blank=True, null=True)
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)    
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     birth_date = models.DateField(null=True, blank=True)
     country = models.CharField(max_length=100, blank=True, default='Україна')
     city = models.CharField(max_length=100, blank=True)
-    
+    languages = models.CharField(max_length=200, blank=True, verbose_name="Знання мов")
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     is_freelance = models.BooleanField(default=True, verbose_name="Фріланс-проєкти")
     is_remote = models.BooleanField(default=False, verbose_name="Постійна віддалена робота")
 
     def __str__(self):
         return f"Profile of {self.user.username}"
-
-class Order(models.Model):
-    client = models.ForeignKey(User, on_delete=models.CASCADE) 
-    title = models.CharField(max_length=200)                
-    description = models.TextField()                       
-    budget = models.IntegerField()                      
-    created_at = models.DateTimeField(auto_now_add=True)       
-    
-    def __str__(self):
-        return self.title
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
-
-class Message(models.Model):
-    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
-    receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
-    content = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"From {self.sender} to {self.receiver}"
-    
-    class Meta:
-        ordering = ['timestamp']
 
 class Order(models.Model):
     CATEGORIES = [
@@ -70,10 +40,60 @@ class Order(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     budget = models.IntegerField()
-
+    requirements = models.TextField(default='', verbose_name="Вимоги до кандидата")
     category = models.CharField(max_length=50, choices=CATEGORIES, default='other')
-    
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
-        return self.title        
+        return self.title
+
+class Interview(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    freelancer = models.ForeignKey(User, on_delete=models.CASCADE)
+    questions = models.TextField() # питання ШІ
+    answers = models.TextField()   # відповіль юзера
+    ai_feedback = models.TextField() # вердикт 
+    score = models.IntegerField()  # оцінка (0-100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.freelancer.username} - {self.score}/100"
+
+class Message(models.Model):
+    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"From {self.sender} to {self.receiver}"
+
+class Transaction(models.Model):
+    TRANSACTION_TYPES = [
+        ('deposit', 'Поповнення'),
+        ('withdrawal', 'Виведення'),
+        ('payment', 'Оплата послуг'),
+        ('income', 'Зарахування'),
+        ('bonus', 'Бонус'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
+    description = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.type} - {self.amount}"
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()

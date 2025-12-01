@@ -26,9 +26,11 @@
                 {% if user.profile.role == 'client' %}
                     <li class="nav-item"><a class="nav-link" href="#">Мої замовлення</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Фрілансери</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Послуги</a></li>
                 {% elif user.profile.role == 'freelancer' %}
                     <li class="nav-item"><a class="nav-link" href="#">Мої ставки</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Всі замовлення</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Мої послуги</a></li>
                 {% endif %}
             </ul>
 
@@ -43,9 +45,48 @@
                     </button>
                 {% endif %}
 
-                <a href="{% url 'inbox' %}" class="text-secondary fs-5 ms-2 text-decoration-none">📩</a>
-                <a href="#" class="text-secondary fs-5 text-decoration-none">🔔</a>
-                
+                <a href="{% url 'inbox' %}" class="text-secondary fs-5 ms-2 text-decoration-none position-relative">
+                    📩
+                </a>
+
+                <div class="dropdown">
+                    <a href="#" class="text-secondary fs-5 text-decoration-none position-relative" data-bs-toggle="dropdown" aria-expanded="false">
+                        🔔
+                        {% if messages %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.5rem;">
+                                {{ messages|length }}
+                            </span>
+                        {% endif %}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-0" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                        <li class="p-3 border-bottom bg-light">
+                            <h6 class="mb-0 fw-bold text-dark">Сповіщення</h6>
+                        </li>
+                        {% if messages %}
+                            {% for message in messages %}
+                                <li>
+                                    <div class="dropdown-item p-3 border-bottom" style="white-space: normal;">
+                                        <div class="d-flex align-items-start">
+                                            <div class="me-2 fs-4">
+                                                {% if message.tags == 'success' %}🎉{% elif message.tags == 'error' %}⚠️{% else %}ℹ️{% endif %}
+                                            </div>
+                                            <div>
+                                                <p class="mb-1 text-dark small">{{ message }}</p>
+                                                <small class="text-muted" style="font-size: 0.7rem;">Щойно</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="p-4 text-center text-muted">
+                                <span class="fs-1">🔕</span><br>
+                                <small>Немає нових сповіщень</small>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+
                 <div style="width: 1px; height: 25px; background: #eee;"></div>
 
                 <form method="post" action="{% url 'account_logout' %}">
@@ -63,7 +104,11 @@
         <div class="col-md-3">
             <div class="content-card text-center p-4 mb-3 border-0">
                 <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 50%; font-size: 32px; line-height: 80px; margin: 0 auto 15px; box-shadow: 0 5px 15px rgba(118, 75, 162, 0.3);">
-                    {{ user.username|slice:":1"|upper }}
+                    {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    {% else %}
+                        {{ user.username|slice:":1"|upper }}
+                    {% endif %}
                 </div>
                 <h5 class="mb-2 fw-bold">
                     {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}
@@ -79,7 +124,7 @@
             <div class="sidebar-menu mb-4 border-0">
                 <a href="#" id="link-dashboard" class="active">🏠 Кабінет</a>
                 <a href="{% url 'inbox' %}">💬 Листування</a>
-                <a href="#">💰 Мої фінанси</a>
+                <a href="#" id="link-finance">💰 Мої фінанси</a>
                 <a href="#" id="link-settings">⚙️ Особисті дані</a>
             </div>
         </div>
@@ -87,7 +132,6 @@
         <div class="col-md-9">
 
             <div id="work-section">
-                
                 {% if user.profile.role == 'client' %}
                 <div class="content-card border-0">
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -112,8 +156,7 @@
                         </div>
                     {% else %}
                         <div class="alert alert-light text-center text-muted py-5">
-                            <span style="font-size: 40px;">📂</span><br>
-                            Активних замовлень немає.
+                            <span style="font-size: 40px;">📂</span><br>Активних замовлень немає.
                         </div>
                     {% endif %}
                 </div>
@@ -133,10 +176,16 @@
                                 <li><a class="dropdown-item" href="?cat=web_dev">💻 Веб-розробка</a></li>
                                 <li><a class="dropdown-item" href="?cat=backend">⚙️ Backend</a></li>
                                 <li><a class="dropdown-item" href="?cat=frontend">🎨 Frontend</a></li>
-                                <li><a class="dropdown-item" href="?cat=mobile">📱 Мобільні додатки</a></li>
+                                <li><a class="dropdown-item" href="?cat=mobile">📱 Мобільна розробка</a></li>
                                 <li><a class="dropdown-item" href="?cat=gamedev">🎮 GameDev</a></li>
                                 <li><a class="dropdown-item" href="?cat=design">🖌️ Дизайн та Арт</a></li>
                                 <li><a class="dropdown-item" href="?cat=qa">🐞 Тестування (QA)</a></li>
+                                <li><a class="dropdown-item" href="?cat=devops">🚀 DevOps / SysAdmin</a></li>
+                                <li><a class="dropdown-item" href="?cat=datascience">🤖 ШІ та Боти</a></li>
+                                <li><a class="dropdown-item" href="?cat=marketing">📢 Маркетинг та SEO</a></li>
+                                <li><a class="dropdown-item" href="?cat=copywriting">✍️ Тексти та Переклади</a></li>
+                                <li><a class="dropdown-item" href="?cat=video">🎬 Відео та Аудіо</a></li>
+                                <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="?cat=other">📌 Інше</a></li>
                             </ul>
                         </div>
@@ -197,6 +246,10 @@
                     </div>
 
                     <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small">Логін (Нікнейм)</label>
+                            {{ u_form.username }}
+                        </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Ім'я</label>
                             {{ u_form.first_name }}
@@ -204,6 +257,10 @@
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Прізвище</label>
                             {{ u_form.last_name }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small">Знання мов</label>
+                            {{ p_form.languages }}
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Країна</label>
@@ -238,6 +295,173 @@
                 </form>
             </div>
 
+            <div id="finance-section" style="display: none;">
+                <h4 class="mb-4 fw-bold">💰 Мої фінанси</h4>
+
+                <div class="content-card border-0 text-white p-4 mb-4 position-relative overflow-hidden" 
+                     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px;">
+                    
+                    <div style="position: absolute; top: -20px; right: -20px; width: 150px; height: 150px; background: white; opacity: 0.1; border-radius: 50%;"></div>
+                    <div style="position: absolute; bottom: -40px; left: -20px; width: 100px; height: 100px; background: white; opacity: 0.1; border-radius: 50%;"></div>
+
+                    <div class="row align-items-center position-relative">
+                        <div class="col-lg-4 mb-3 mb-lg-0">
+                            <p class="mb-1 opacity-75 small text-uppercase" style="letter-spacing: 1px;">Доступний баланс</p>
+                            <h2 class="fw-bold mb-0">{{ user.profile.balance }} <span class="fs-5">грн</span></h2>
+                        </div>
+                        
+                        <div class="col-lg-8 text-lg-end d-flex gap-2 justify-content-lg-end flex-wrap">
+                            <button class="btn btn-light text-primary fw-bold px-3 rounded-pill shadow-sm border-0" data-bs-toggle="modal" data-bs-target="#depositModal" style="font-size: 0.9rem;">
+                                📥 Поповнити
+                            </button>
+                            <button class="btn btn-light text-primary fw-bold px-3 rounded-pill shadow-sm border-0" data-bs-toggle="modal" data-bs-target="#transferModal" style="font-size: 0.9rem;">
+                                💸 Переказати
+                            </button>
+                            <button class="btn btn-outline-light fw-bold px-3 rounded-pill" data-bs-toggle="modal" data-bs-target="#withdrawModal" style="font-size: 0.9rem; border-width: 2px;">
+                                📤 Вивести
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="content-card border-0 p-3 mb-0 d-flex align-items-center">
+                            <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3 text-success">⬆️</div>
+                            <div>
+                                <small class="text-muted d-block">Надходження</small>
+                                <h5 class="mb-0 fw-bold">{{ income_total }} грн</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="content-card border-0 p-3 mb-0 d-flex align-items-center">
+                            <div class="rounded-circle bg-danger bg-opacity-10 p-3 me-3 text-danger">⬇️</div>
+                            <div>
+                                <small class="text-muted d-block">Витрати</small>
+                                <h5 class="mb-0 fw-bold">{{ expense_total }} грн</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card border-0">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0 fw-bold">Історія операцій</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm dropdown-toggle border" type="button" data-bs-toggle="dropdown">
+                                {% if active_filter == 'income' %}📥 Зарахування{% elif active_filter == 'expense' %}📤 Витрати{% else %}🔄 Всі операції{% endif %}
+                            </button>
+                            <ul class="dropdown-menu border-0 shadow">
+                                <li><a class="dropdown-item" href="?tab=finance&trans_type=all">🔄 Всі операції</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-success" href="?tab=finance&trans_type=income">📥 Тільки зарахування</a></li>
+                                <li><a class="dropdown-item text-danger" href="?tab=finance&trans_type=expense">📤 Тільки витрати</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for t in transactions %}
+                            <div class="list-group-item px-0 py-3 border-bottom d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-light p-2 text-center" style="width: 40px; height: 40px;">
+                                        {% if t.type == 'deposit' %}💳{% elif t.type == 'bonus' %}🎁{% elif t.type == 'income' %}💰{% else %}💸{% endif %}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 text-dark">{{ t.description }}</h6>
+                                        <small class="text-muted">{{ t.created_at|date:"d M Y, H:i" }}</small>
+                                    </div>
+                                </div>
+                                <span class="fw-bold {% if t.type in 'withdrawal payment' %}text-danger{% else %}text-success{% endif %}">
+                                    {% if t.type in 'withdrawal payment' %}-{% else %}+{% endif %} {{ t.amount }} грн
+                                </span>
+                            </div>
+                        {% empty %}
+                            <p class="text-center text-muted my-3">Історія порожня</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="depositModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Поповнити баланс</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{% url 'finance_deposit' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label class="form-label">Введіть суму (грн)</label>
+                    <input type="number" name="amount" class="form-control form-control-lg" placeholder="1000" required>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn btn-success w-100 py-2">Сплатити карткою</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="withdrawModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Вивести кошти</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{% url 'finance_withdraw' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label class="form-label">Сума виведення</label>
+                    <input type="number" name="amount" class="form-control form-control-lg" placeholder="0.00" required>
+                    <small class="text-muted">Доступно: {{ user.profile.balance }} грн</small>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn btn-primary w-100 py-2">Підтвердити</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="transferModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Переказати кошти</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{% url 'finance_transfer' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Логін отримувача</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">@</span>
+                            <input type="text" name="username" class="form-control form-control-lg" placeholder="username" required>
+                        </div>
+                        <div class="form-text">Введіть точний логін фрілансера</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Сума (грн)</label>
+                        <input type="number" name="amount" class="form-control form-control-lg" placeholder="0.00" required>
+                    </div>
+                    
+                    <div class="alert alert-light border text-center">
+                        Доступно: <strong>{{ user.profile.balance }} грн</strong>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn btn-gradient w-100 py-2 rounded-pill">Надіслати кошти</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -246,26 +470,59 @@
 document.addEventListener('DOMContentLoaded', function() {
     const linkDashboard = document.getElementById('link-dashboard');
     const linkSettings = document.getElementById('link-settings');
+    const linkFinance = document.getElementById('link-finance');
+    
     const sectionWork = document.getElementById('work-section');
     const sectionSettings = document.getElementById('settings-section');
+    const sectionFinance = document.getElementById('finance-section');
 
-    linkDashboard.addEventListener('click', function(e) {
-        e.preventDefault();
-        sectionWork.style.display = 'block';
-        sectionSettings.style.display = 'none';
-        
-        linkDashboard.classList.add('active');
-        linkSettings.classList.remove('active');
-    });
-
-    linkSettings.addEventListener('click', function(e) {
-        e.preventDefault();
+    function hideAll() {
         sectionWork.style.display = 'none';
-        sectionSettings.style.display = 'block';
+        sectionSettings.style.display = 'none';
+        if(sectionFinance) sectionFinance.style.display = 'none';
         
-        linkSettings.classList.add('active');
         linkDashboard.classList.remove('active');
-    });
+        linkSettings.classList.remove('active');
+        if(linkFinance) linkFinance.classList.remove('active');
+    }
+
+    function showDashboard() {
+        hideAll();
+        sectionWork.style.display = 'block';
+        linkDashboard.classList.add('active');
+    }
+
+    function showSettings() {
+        hideAll();
+        sectionSettings.style.display = 'block';
+        linkSettings.classList.add('active');
+    }
+
+    function showFinance() {
+        hideAll();
+        if (sectionFinance) {
+            sectionFinance.style.display = 'block';
+            linkFinance.classList.add('active');
+        }
+    }
+
+    linkDashboard.addEventListener('click', function(e) { e.preventDefault(); showDashboard(); });
+    linkSettings.addEventListener('click', function(e) { e.preventDefault(); showSettings(); });
+    
+    if (linkFinance) {
+        linkFinance.addEventListener('click', function(e) { e.preventDefault(); showFinance(); });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+
+    if (tab === 'finance') {
+        showFinance();
+    } else if (tab === 'settings') {
+        showSettings();
+    } else {
+        showDashboard();
+    }
 });
 </script>
 
