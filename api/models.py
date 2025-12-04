@@ -5,19 +5,21 @@ from django.dispatch import receiver
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role = models.CharField(max_length=20, blank=True, null=True)
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    birth_date = models.DateField(null=True, blank=True)
-    country = models.CharField(max_length=100, blank=True, default='Україна')
-    city = models.CharField(max_length=100, blank=True)
+    avatar = models.ImageField(default='default.jpg', upload_to='profile_images')
+    role = models.CharField(max_length=20, default='client') # choices
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    country = models.CharField(max_length=100, blank=True, verbose_name="Країна")
+    city = models.CharField(max_length=100, blank=True, verbose_name="Місто")
+    birth_date = models.DateField(null=True, blank=True, verbose_name="Дата народження")
     languages = models.CharField(max_length=200, blank=True, verbose_name="Знання мов")
-    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    is_freelance = models.BooleanField(default=True, verbose_name="Фріланс-проєкти")
-    is_remote = models.BooleanField(default=False, verbose_name="Постійна віддалена робота")
+    bio = models.TextField(blank=True, verbose_name="Про себе") 
+    
+    is_freelance = models.BooleanField(default=False, verbose_name="Шукаю проєкти")
+    is_remote = models.BooleanField(default=False, verbose_name="Тільки віддалено")
 
     def __str__(self):
-        return f"Profile of {self.user.username}"
+        return f'{self.user.username} Profile'
 
 class Order(models.Model):
     CATEGORIES = [
@@ -36,13 +38,35 @@ class Order(models.Model):
         ('other', 'Інше'),
     ]
 
-    client = models.ForeignKey(User, on_delete=models.CASCADE)
+    STATUS_CHOICES = [
+        ('open', 'Відкрито (Пошук)'),
+        ('in_progress', 'В роботі'),
+        ('completed', 'Виконано')
+    ]
+
+    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_orders') # Додав related_name для зручності
     title = models.CharField(max_length=200)
     description = models.TextField()
     budget = models.IntegerField()
     requirements = models.TextField(default='', verbose_name="Вимоги до кандидата")
     category = models.CharField(max_length=50, choices=CATEGORIES, default='other')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='open', 
+        verbose_name="Статус"
+    )
+    
+    executor = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='executed_orders', 
+        verbose_name="Виконавець"
+    )
 
     def __str__(self):
         return self.title

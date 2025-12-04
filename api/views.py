@@ -1,5 +1,6 @@
 import google.generativeai as genai
 import sys
+import re 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -65,13 +66,6 @@ def dashboard(request):
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=profile)
 
-    my_orders = Order.objects.filter(client=request.user).order_by('-created_at')
-    all_orders = Order.objects.all().order_by('-created_at')
-
-    cat = request.GET.get('cat')
-    if cat and cat != 'all':
-        all_orders = all_orders.filter(category=cat)
-
     transactions = Transaction.objects.filter(user=request.user).order_by('-created_at')
     
     trans_filter = request.GET.get('trans_type')
@@ -86,14 +80,37 @@ def dashboard(request):
     context = {
         'u_form': u_form, 
         'p_form': p_form,
-        'my_orders': my_orders, 
-        'all_orders': all_orders,
-        'active_cat': cat,
+        'profile': profile, 
         'transactions': transactions,
         'income_total': income_total, 
         'expense_total': expense_total,
         'active_filter': trans_filter
     }
+
+    if profile.role == 'client':
+        my_orders = Order.objects.filter(client=request.user, status='open').order_by('-created_at')
+        
+        orders_in_progress = Order.objects.filter(client=request.user, status='in_progress').order_by('-created_at')
+        
+        completed_orders = Order.objects.filter(client=request.user, status='completed').order_by('-created_at')
+
+        context['my_orders'] = my_orders  
+        context['orders_in_progress'] = orders_in_progress 
+        context['completed_orders'] = completed_orders 
+
+    elif profile.role == 'freelancer':
+        all_orders = Order.objects.filter(status='open').order_by('-created_at')
+
+        cat = request.GET.get('cat')
+        if cat and cat != 'all':
+            all_orders = all_orders.filter(category=cat)
+
+        my_tasks = Order.objects.filter(executor=request.user, status='in_progress').order_by('-created_at')
+
+        context['all_orders'] = all_orders 
+        context['my_tasks'] = my_tasks     
+        context['active_cat'] = cat        
+
     return render(request, 'dashboard.html', context)
 
 @login_required
@@ -203,23 +220,24 @@ def ai_interview_start(request, order_id):
         return redirect('order_detail', order_id=order.id)
 
     genai.configure(api_key=settings.GEMINI_API_KEY)
+    
     model = genai.GenerativeModel('gemini-2.5-flash')
     
     prompt = f"""
     Ти суворий технічний рекрутер.
     Замовлення: "{order.title}".
     Опис: "{order.description}".
-    Вимоги до кандидата: "{order.requirements}".
+    Вимоги: "{order.requirements}".
     
-    Сформулюй 3 складних технічних запитання українською мовою, щоб перевірити, чи відповідає кандидат цим вимогам.
-    Питання мають бути конкретними. Просто пронумерований список.
+    Сформулюй 3 технічних питання українською.
     """
     
     try:
         response = model.generate_content(prompt)
         questions = response.text
-    except:
-        questions = "1. Розкажіть про свій досвід.\n2. Чому ви хочете цей проєкт?\n3. Ваші сильні сторони?"
+    except Exception as e:
+        print(f"ПОМИЛКА ШІ: {e}")
+        questions = "1. Розкажіть про свій досвід.\n2. Чому цей проєкт?\n3. Ваші сильні сторони?"
 
     return render(request, 'ai_interview.html', {'order': order, 'questions': questions})
 
@@ -229,22 +247,6 @@ def ai_interview_check(request, order_id):
         order = get_object_or_404(Order, id=order_id)
         questions = request.POST.get('questions_text')
         user_answers = request.POST.get('user_answers')
-
-       # print("--- СПИСОК ДОСТУПНИХ МОДЕЛЕЙ ---")
-       # try:
-       #     for m in genai.list_models():
-       #        if 'generateContent' in m.supported_generation_methods:
-       #             print(m.name)
-       # except Exception as e:
-       #     print(f"!!! ПОМИЛКА ДОСТУПУ: {e}")
-       # print("----------------------------------")
-
-       # print("="*30)
-       # print(f"PYTHON EXE: {sys.executable}")
-       # print(f"GENAI VERSION: {genai.__version__}")
-       # print("="*30)
-
-       # print(f"РЕАЛЬНА ВЕРСІЯ БІБЛІОТЕКИ: {genai.__version__}")
 
         genai.configure(api_key=settings.GEMINI_API_KEY)
         model = genai.GenerativeModel('gemini-2.5-flash')
@@ -266,7 +268,6 @@ def ai_interview_check(request, order_id):
             response = model.generate_content(prompt)
             feedback_text = response.text
             
-            import re
             score_match = re.search(r'SCORE:\s*(\d+)', feedback_text)
             score = int(score_match.group(1)) if score_match else 50
             
@@ -325,3 +326,31 @@ def chat_room(request, user_id):
     else:
         form = MessageForm()
     return render(request, 'chat_room.html', {'other_user': other_user, 'messages': messages_list, 'form': form})
+
+@login_required
+def assign_freelancer(request, order_id, freelancer_id):
+    order = get_object_or_404(Order, id=order_id)
+    freelancer = get_object_or_404(User, id=freelancer_id)
+    
+    if request.user == order.client:
+        order.executor = freelancer
+        order.status = 'in_progress'
+        order.save()
+        messages.success(request, f"Виконавця {freelancer.username} призначено!")
+    else:
+        messages.error(request, "У вас немає прав.")
+        
+    return redirect('order_detail', order_id=order.id)
+
+@login_required
+def complete_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    
+    if request.user == order.client and order.status == 'in_progress':
+        order.status = 'completed'
+        order.save()
+        messages.success(request, "Вітаємо! Завдання позначено як виконане.")
+    else:
+        messages.error(request, "Помилка доступу.")
+        
+    return redirect('order_detail', order_id=order.id)

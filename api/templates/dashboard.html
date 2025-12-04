@@ -21,28 +21,15 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 fw-medium">
-                {% if user.profile.role == 'client' %}
-                    <li class="nav-item"><a class="nav-link" href="#">Мої замовлення</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Фрілансери</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Послуги</a></li>
-                {% elif user.profile.role == 'freelancer' %}
-                    <li class="nav-item"><a class="nav-link" href="#">Мої ставки</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Всі замовлення</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Мої послуги</a></li>
-                {% endif %}
-            </ul>
-
             <div class="d-flex align-items-center gap-3">
                 {% if user.profile.role == 'client' %}
                     <a href="{% url 'create_order' %}" class="btn btn-gradient px-4 py-2 rounded-pill">
                         + Нове замовлення
                     </a>
                 {% elif user.profile.role == 'freelancer' %}
-                    <button class="btn btn-gradient px-4 py-2 rounded-pill">
+                    <a href="#work-section" onclick="showDashboard()" class="btn btn-gradient px-4 py-2 rounded-pill">
                         🔍 Пошук завдань
-                    </button>
+                    </a>
                 {% endif %}
 
                 <a href="{% url 'inbox' %}" class="text-secondary fs-5 ms-2 text-decoration-none position-relative">
@@ -132,99 +119,145 @@
         <div class="col-md-9">
 
             <div id="work-section">
-                {% if user.profile.role == 'client' %}
-                <div class="content-card border-0">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="mb-0 fw-bold">Мої Замовлення</h4>
-                    </div>
-                    
-                    {% if my_orders %}
-                        <div class="list-group list-group-flush">
-                            {% for order in my_orders %}
-                                <a href="{% url 'order_detail' order.id %}" class="list-group-item list-group-item-action px-0 py-3 border-bottom text-decoration-none">
+                {% if user.profile.role == 'client' %}                 
+                    {% if orders_in_progress %}
+                    <div class="content-card border-0 mb-4" style="background: linear-gradient(to right, #e3f2fd, #ffffff); border-left: 5px solid #2196f3;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0 fw-bold text-primary">⚙️ В розробці (Active)</h5>
+                        </div>
+                        <div class="list-group list-group-flush bg-transparent">
+                            {% for order in orders_in_progress %}
+                                <div class="list-group-item bg-transparent px-0 py-3 border-bottom">
                                     <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <h5 class="mb-1 text-dark fw-bold">{{ order.title }}</h5>
-                                        <div class="d-flex gap-2 align-items-center">
-                                            <span class="badge badge-price">{{ order.budget }} грн</span>
-                                            <object><a href="{% url 'edit_order' order.id %}" class="btn btn-light btn-sm text-muted border" title="Редагувати">✏️</a></object>
+                                        <div>
+                                            <h5 class="mb-1 text-dark fw-bold">{{ order.title }}</h5>
+                                            <small class="text-muted">
+                                                Виконавець: <strong>{{ order.executor.username }}</strong>
+                                            </small>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'chat_room' order.executor.id %}" class="btn btn-sm btn-outline-dark rounded-pill">💬 Чат</a>
+                                            <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-primary rounded-pill">Деталі</a>
                                         </div>
                                     </div>
-                                    <small class="text-muted d-block mt-1">{{ order.created_at|date:"d.m.Y" }}</small>
-                                    <p class="text-muted mt-2 mb-0 small">{{ order.description|truncatechars:80 }}</p>
-                                </a>
+                                </div>
                             {% endfor %}
                         </div>
-                    {% else %}
-                        <div class="alert alert-light text-center text-muted py-5">
-                            <span style="font-size: 40px;">📂</span><br>Активних замовлень немає.
-                        </div>
-                    {% endif %}
-                </div>
-
-                {% elif user.profile.role == 'freelancer' %}
-                <div class="content-card border-0">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="mb-0 fw-bold">Стрічка замовлень</h4>
-                        
-                        <div class="dropdown">
-                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                🔽 Категорії
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="max-height: 400px; overflow-y: auto;">
-                                <li><a class="dropdown-item fw-bold text-primary" href="?cat=all">🌐 Всі замовлення</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="?cat=web_dev">💻 Веб-розробка</a></li>
-                                <li><a class="dropdown-item" href="?cat=backend">⚙️ Backend</a></li>
-                                <li><a class="dropdown-item" href="?cat=frontend">🎨 Frontend</a></li>
-                                <li><a class="dropdown-item" href="?cat=mobile">📱 Мобільна розробка</a></li>
-                                <li><a class="dropdown-item" href="?cat=gamedev">🎮 GameDev</a></li>
-                                <li><a class="dropdown-item" href="?cat=design">🖌️ Дизайн та Арт</a></li>
-                                <li><a class="dropdown-item" href="?cat=qa">🐞 Тестування (QA)</a></li>
-                                <li><a class="dropdown-item" href="?cat=devops">🚀 DevOps / SysAdmin</a></li>
-                                <li><a class="dropdown-item" href="?cat=datascience">🤖 ШІ та Боти</a></li>
-                                <li><a class="dropdown-item" href="?cat=marketing">📢 Маркетинг та SEO</a></li>
-                                <li><a class="dropdown-item" href="?cat=copywriting">✍️ Тексти та Переклади</a></li>
-                                <li><a class="dropdown-item" href="?cat=video">🎬 Відео та Аудіо</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="?cat=other">📌 Інше</a></li>
-                            </ul>
-                        </div>
                     </div>
-                    
-                    {% if all_orders %}
-                        <div class="list-group list-group-flush">
-                            {% for order in all_orders %}
-                                <a href="{% url 'order_detail' order.id %}" class="list-group-item list-group-item-action px-0 py-4 border-bottom">
-                                    <div class="d-flex w-100 justify-content-between align-items-start">
-                                        <div>
-                                            <h5 class="mb-1 text-dark fw-bold">
-                                                {{ order.title }}
-                                                <span class="badge bg-light text-secondary border ms-2" style="font-size: 0.6em; vertical-align: middle;">{{ order.get_category_display }}</span>
-                                            </h5>
-                                            <p class="mb-2 text-muted">{{ order.description|truncatechars:120 }}</p>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <small class="text-muted">👤 {{ order.client.username }}</small>
-                                                <small class="text-muted">🕒 {{ order.created_at|timesince }} тому</small>
+                    {% endif %}
+
+                    <div class="content-card border-0">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="mb-0 fw-bold">🔍 Мої вакансії (Пошук)</h4>
+                        </div>
+                        
+                        {% if my_orders %}
+                            <div class="list-group list-group-flush">
+                                {% for order in my_orders %}
+                                    <a href="{% url 'order_detail' order.id %}" class="list-group-item list-group-item-action px-0 py-3 border-bottom text-decoration-none">
+                                        <div class="d-flex w-100 justify-content-between align-items-center">
+                                            <h5 class="mb-1 text-dark fw-bold">{{ order.title }}</h5>
+                                            <div class="d-flex gap-2 align-items-center">
+                                                <span class="badge badge-price">{{ order.budget }} грн</span>
+                                                <object><a href="{% url 'edit_order' order.id %}" class="btn btn-light btn-sm text-muted border" title="Редагувати">✏️</a></object>
                                             </div>
                                         </div>
-                                        <div class="text-end">
-                                            <div class="badge badge-price mb-2 fs-6">{{ order.budget }} грн</div>
-                                            <br>
-                                            <object><a href="{% url 'chat_room' order.client.id %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Написати</a></object>
+                                        <small class="text-muted d-block mt-1">{{ order.created_at|date:"d.m.Y" }}</small>
+                                        <p class="text-muted mt-2 mb-0 small">{{ order.description|truncatechars:80 }}</p>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-light text-center text-muted py-5">
+                                <span style="font-size: 40px;">📂</span><br>
+                                У вас немає активних вакансій.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                {% elif user.profile.role == 'freelancer' %}
+                    {% if my_tasks %}
+                    <div class="content-card border-0 mb-4" style="background: linear-gradient(to right, #e8f5e9, #ffffff); border-left: 5px solid #4caf50;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0 fw-bold text-success">🔥 Мої завдання (В роботі)</h5>
+                        </div>
+                        <div class="list-group list-group-flush bg-transparent">
+                            {% for task in my_tasks %}
+                                <div class="list-group-item bg-transparent px-0 py-3 border-bottom">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="mb-1 text-dark fw-bold">{{ task.title }}</h5>
+                                            <small class="text-muted">
+                                                Клієнт: <strong>{{ task.client.username }}</strong>
+                                            </small>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'chat_room' task.client.id %}" class="btn btn-sm btn-outline-dark rounded-pill">💬 Чат</a>
+                                            <a href="{% url 'order_detail' task.id %}" class="btn btn-sm btn-success rounded-pill">До завдання</a>
                                         </div>
                                     </div>
-                                </a>
+                                </div>
                             {% endfor %}
                         </div>
-                    {% else %}
-                        <div class="alert alert-light text-center py-5">
-                            Поки що завдань немає 😴
-                        </div>
+                    </div>
                     {% endif %}
-                </div>
+
+                    <div class="content-card border-0">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="mb-0 fw-bold">🌐 Стрічка замовлень</h4>
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    {% if active_cat and active_cat != 'all' %}Категорія: {{ active_cat }}{% else %}Всі категорії{% endif %}
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="max-height: 400px; overflow-y: auto;">
+                                    <li><a class="dropdown-item fw-bold text-primary" href="?cat=all">🌐 Всі замовлення</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="?cat=web_dev">💻 Веб-розробка</a></li>
+                                    <li><a class="dropdown-item" href="?cat=backend">⚙️ Backend</a></li>
+                                    <li><a class="dropdown-item" href="?cat=frontend">🎨 Frontend</a></li>
+                                    <li><a class="dropdown-item" href="?cat=mobile">📱 Мобільна розробка</a></li>
+                                    <li><a class="dropdown-item" href="?cat=design">🖌️ Дизайн</a></li>
+                                    <li><a class="dropdown-item" href="?cat=qa">🐞 Тестування</a></li>
+                                    <li><a class="dropdown-item" href="?cat=other">📌 Інше</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        {% if all_orders %}
+                            <div class="list-group list-group-flush">
+                                {% for order in all_orders %}
+                                    <a href="{% url 'order_detail' order.id %}" class="list-group-item list-group-item-action px-0 py-4 border-bottom">
+                                        <div class="d-flex w-100 justify-content-between align-items-start">
+                                            <div>
+                                                <h5 class="mb-1 text-dark fw-bold">
+                                                    {{ order.title }}
+                                                    <span class="badge bg-light text-secondary border ms-2" style="font-size: 0.6em; vertical-align: middle;">{{ order.get_category_display }}</span>
+                                                </h5>
+                                                <p class="mb-2 text-muted">{{ order.description|truncatechars:120 }}</p>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <small class="text-muted">👤 {{ order.client.username }}</small>
+                                                    <small class="text-muted">🕒 {{ order.created_at|timesince }} тому</small>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="badge badge-price mb-2 fs-6">{{ order.budget }} грн</div>
+                                                <br>
+                                                <object><a href="{% url 'chat_room' order.client.id %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Написати</a></object>
+                                            </div>
+                                        </div>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-light text-center py-5">
+                                Поки що завдань немає 😴
+                            </div>
+                        {% endif %}
+                    </div>
                 {% endif %}
             </div>
-
+            
             <div class="content-card border-0" id="settings-section" style="display: none;">
                 <h4 class="mb-4 fw-bold">📝 Особисті дані</h4>
                 
@@ -258,10 +291,12 @@
                             <label class="form-label text-muted small">Прізвище</label>
                             {{ u_form.last_name }}
                         </div>
+
                         <div class="col-md-12">
                             <label class="form-label text-muted small">Знання мов</label>
                             {{ p_form.languages }}
                         </div>
+
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Країна</label>
                             {{ p_form.country }}
@@ -270,22 +305,26 @@
                             <label class="form-label text-muted small">Місто</label>
                             {{ p_form.city }}
                         </div>
+
                         <div class="col-md-12">
                             <label class="form-label text-muted small">Дата народження</label>
                             {{ p_form.birth_date }}
                         </div>
-                    </div>
 
-                    <hr class="my-4 bg-light">
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small">Про себе (Біографія)</label>
+                            {{ p_form.bio }}
+                        </div>
+                    </div>
                     
-                    <div class="d-flex gap-3">
+                    <div class="d-flex gap-4 mt-3 p-3 bg-light rounded-3 border">
                         <div class="form-check">
                             {{ p_form.is_freelance }}
-                            <label class="form-check-label small text-muted">Фриланс-проєкти</label>
+                            <label class="form-check-label text-muted small">Шукаю проєкти</label>
                         </div>
                         <div class="form-check">
                             {{ p_form.is_remote }}
-                            <label class="form-check-label small text-muted">Віддалена робота</label>
+                            <label class="form-check-label text-muted small">Тільки віддалено</label>
                         </div>
                     </div>
 
@@ -324,43 +363,9 @@
                     </div>
                 </div>
 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <div class="content-card border-0 p-3 mb-0 d-flex align-items-center">
-                            <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3 text-success">⬆️</div>
-                            <div>
-                                <small class="text-muted d-block">Надходження</small>
-                                <h5 class="mb-0 fw-bold">{{ income_total }} грн</h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="content-card border-0 p-3 mb-0 d-flex align-items-center">
-                            <div class="rounded-circle bg-danger bg-opacity-10 p-3 me-3 text-danger">⬇️</div>
-                            <div>
-                                <small class="text-muted d-block">Витрати</small>
-                                <h5 class="mb-0 fw-bold">{{ expense_total }} грн</h5>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="content-card border-0">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0 fw-bold">Історія операцій</h5>
-                        <div class="dropdown">
-                            <button class="btn btn-light btn-sm dropdown-toggle border" type="button" data-bs-toggle="dropdown">
-                                {% if active_filter == 'income' %}📥 Зарахування{% elif active_filter == 'expense' %}📤 Витрати{% else %}🔄 Всі операції{% endif %}
-                            </button>
-                            <ul class="dropdown-menu border-0 shadow">
-                                <li><a class="dropdown-item" href="?tab=finance&trans_type=all">🔄 Всі операції</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-success" href="?tab=finance&trans_type=income">📥 Тільки зарахування</a></li>
-                                <li><a class="dropdown-item text-danger" href="?tab=finance&trans_type=expense">📤 Тільки витрати</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="list-group list-group-flush">
+                     {% if transactions %}
+                     <div class="list-group list-group-flush">
                         {% for t in transactions %}
                             <div class="list-group-item px-0 py-3 border-bottom d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center gap-3">
@@ -376,10 +381,11 @@
                                     {% if t.type in 'withdrawal payment' %}-{% else %}+{% endif %} {{ t.amount }} грн
                                 </span>
                             </div>
-                        {% empty %}
-                            <p class="text-center text-muted my-3">Історія порожня</p>
                         {% endfor %}
-                    </div>
+                     </div>
+                     {% else %}
+                        <p class="text-center text-muted my-3">Історія порожня</p>
+                     {% endif %}
                 </div>
             </div>
 
@@ -446,16 +452,10 @@
                             <span class="input-group-text bg-light">@</span>
                             <input type="text" name="username" class="form-control form-control-lg" placeholder="username" required>
                         </div>
-                        <div class="form-text">Введіть точний логін фрілансера</div>
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label">Сума (грн)</label>
                         <input type="number" name="amount" class="form-control form-control-lg" placeholder="0.00" required>
-                    </div>
-                    
-                    <div class="alert alert-light border text-center">
-                        Доступно: <strong>{{ user.profile.balance }} грн</strong>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
@@ -486,7 +486,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if(linkFinance) linkFinance.classList.remove('active');
     }
 
-    function showDashboard() {
+    window.showDashboard = function() { 
         hideAll();
         sectionWork.style.display = 'block';
         linkDashboard.classList.add('active');

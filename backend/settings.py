@@ -98,7 +98,11 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# MEDIA_ROOT = BASE_DIR / 'media'
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -125,4 +129,4 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-GEMINI_API_KEY = "AIzaSyAetzMGJamM57vFri5XH1xDimCHvdtxWpQ"
+GEMINI_API_KEY = "AIzaSyDpavKjOnaLyfWBjUal4b34iY3O4umMnJU"

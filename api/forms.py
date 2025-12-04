@@ -28,10 +28,13 @@ class UserUpdateForm(forms.ModelForm):
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['avatar', 'languages', 'is_freelance', 'is_remote', 'birth_date', 'country', 'city'] # <--- Додали 'languages'
+        fields = ['avatar', 'languages', 'bio', 'is_freelance', 'is_remote', 'birth_date', 'country', 'city'] 
+        
         widgets = {
             'avatar': forms.FileInput(attrs={'class': 'form-control'}),
             'languages': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Наприклад: Англійська (B2), Українська (Рідна)'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Розкажіть про свій досвід...'}),
+            
             'birth_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'country': forms.TextInput(attrs={'class': 'form-control'}),
             'city': forms.TextInput(attrs={'class': 'form-control'}),
